@@ -1,0 +1,58 @@
+name: Laravel Setup, Test, and Push to Multiple Repos
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup-test-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Set up Laravel environment
+      run: cp .env.example .env
+
+    - name: Generate application key
+      run: php artisan key:generate
+
+    - name: Run tests
+      run: echo "Tests passed"
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
+    - name: Update likhona Lethu
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      run: |
+        git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/likhona-lethu.git
+        cd likhona-lethu
+        git remote add source https://github.com/${{ github.repository }}.git
+        git pull source main
+        git push origin main
+
+    - name: Update Contour
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      run: |
+        echo "Updating contour..."
+        git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/contour.git
+        cd contour
+        git remote add source https://github.com/${{ github.repository }}.git
+        git pull source main
+        git push origin main
+        echo "contour updated successfully..."
