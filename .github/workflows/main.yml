@@ -20,15 +20,17 @@ jobs:
         # Clone the target repository
         git clone "https://oauth2:${GITHUB_TOKEN}@github.com/dev-kaycee/likhona-lethu.git" client1_repo
         
-        # Clear existing files in cloned repo (except .git)
+        # Change to cloned repository directory
         cd client1_repo
+        
+        # Remove existing files except .git directory
         git rm -rf . || true
         
-        # Copy files from source repository
-        cp -R ../. ./
+        # Copy files from the checked-out source repository
+        cp -R ../ ./
         
         # Remove unnecessary directories and files
-        rm -rf .git .github vendor
+        rm -rf .git .github/workflows vendor .env
         
         # Stage, commit, and push changes
         git add .
