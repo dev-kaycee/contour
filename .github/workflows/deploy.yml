@@ -63,6 +63,15 @@ jobs:
         cp .env.example .env
         php artisan key:generate
 
+    - name: Set environment variables
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=homestead" >> .env
+        echo "DB_USERNAME=homestead" >> .env
+        echo "DB_PASSWORD=secret" >> .env
+
     - name: Run migrations
       run: php artisan migrate --force
 
@@ -70,7 +79,7 @@ jobs:
       run: php artisan db:seed --force
 
     - name: Run tests
-      run: echo "Tests passed successfully..."
+      run: php artisan test
 
   update:
     runs-on: ubuntu-latest
