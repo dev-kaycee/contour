@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Deploy to Likhona Lethu
       env:
@@ -27,7 +29,7 @@ jobs:
         git rm -rf . || true
         
         # Copy files from the checked-out source repository
-        cp -R ../ ./
+        cp -R ../${{ github.event.repository.name }}/* ./
         
         # Remove unnecessary directories and files
         rm -rf .git .github/workflows vendor .env
