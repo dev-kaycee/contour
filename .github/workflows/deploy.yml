@@ -1,4 +1,4 @@
-name: Laravel Setup, Test, and Push to Multiple Repos
+name: Laravel Setup, Test, Update, and Deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  setup-test-and-push:
+  setup:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '8.0'
 
     - name: Install dependencies
       run: composer install
@@ -27,8 +27,32 @@ jobs:
     - name: Generate application key
       run: php artisan key:generate
 
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+
+    - name: Install dependencies
+      run: composer install
+
     - name: Run tests
-      run: echo "Tests passed"
+      run: php artisan test
+
+  update:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
 
     - name: Set up Git
       run: |
@@ -45,14 +69,27 @@ jobs:
         git pull source main
         git push origin main
 
-    - name: Update Contour
+  deploy:
+    runs-on: ubuntu-latest
+    needs: update
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
+    - name: Deploy to Contour
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        echo "Updating contour..."
+        echo "Deploying to contour..."
         git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/contour.git
         cd contour
         git remote add source https://github.com/${{ github.repository }}.git
         git pull source main
         git push origin main
-        echo "contour updated successfully..."
+        echo "Contour deployed successfully..."
