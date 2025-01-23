@@ -1,4 +1,4 @@
-name: Clone and Push to Another Repo
+name: Clone and Push to Multiple Repos
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  clone-and-push:
+  update-clients:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,18 +18,26 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
 
-    - name: Clone target repository
+    - name: Clone and push to likhona-lethu
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
+        echo "Updating likhona-lethu..."
         git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/likhona-lethu.git
         cd likhona-lethu
         git remote add source https://github.com/${{ github.repository }}.git
         git pull source main
+        git push origin main
+        echo "likhona-lethu updated successfully..."
 
-    - name: Push to target repository
+    - name: Clone and push to contour
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        cd likhona-lethu
+        echo "Updating contour..."
+        git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/contour.git
+        cd contour
+        git remote add source https://github.com/${{ github.repository }}.git
+        git pull source main
         git push origin main
+        echo "contour updated successfully..."
