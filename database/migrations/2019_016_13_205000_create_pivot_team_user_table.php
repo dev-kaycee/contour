@@ -13,33 +13,19 @@ class CreatePivotTeamUserTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasColumn('users', 'team_id')) {
-            Schema::table('users', function (Blueprint $table) {
-                // index from 2018_06_13_201720_add_5b2151a03f6ed_relationships_to_user_table.php
-                $table->dropForeign('171563_5b21519b178e4');
-                $table->dropColumn('team_id');
+        if (!Schema::hasTable('team_user')) {
+            Schema::create('team_user', function (Blueprint $table) {
+                $table->increments('id');
+                $table->unsignedInteger('team_id');
+                $table->unsignedInteger('user_id');
+                $table->timestamps();
+
+                $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+                $table->unique(['team_id', 'user_id']);
             });
         }
-
-			Schema::create('team_user', function (Blueprint $table) {
-				$table->increments('id');
-				$table->unsignedBigInteger('team_id');
-				$table->unsignedBigInteger('user_id');
-
-				$table->foreign('team_id')
-						->references('id')
-						->on('teams')
-						->onDelete('cascade');
-
-				$table->foreign('user_id')
-						->references('id')
-						->on('users')
-						->onDelete('cascade');
-
-				$table->timestamps();
-
-				$table->unique(['team_id', 'user_id']);
-			});
     }
 
     /**

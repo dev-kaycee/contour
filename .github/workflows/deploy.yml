@@ -73,7 +73,7 @@ jobs:
         echo "DB_PASSWORD=secret" >> .env
 
     - name: Run migrations
-      run: php artisan migrate -v --force
+      run: php artisan migrate -v
 
     - name: Run seeders
       run: php artisan db:seed --force
