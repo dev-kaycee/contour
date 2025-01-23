@@ -1,0 +1,46 @@
+name: Deploy to Multiple Clients
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: |
+          ${{ secrets.DEPLOY_KEY_CLIENT1 }}
+          # ${{ secrets.DEPLOY_KEY_CLIENT2 }}
+
+    - name: Deploy to Likhona Lethu
+      run: |
+        git config --global user.email "hthabang23@gmail.com"
+        git config --global user.name "dev-kaycee"
+        git clone https://github.com/dev-kaycee/likhona-lethu.git client1_repo
+        rsync -avz --delete \
+          --exclude '.git' \
+          --exclude 'vendor/' \
+          --exclude '.env' \
+          . client1_repo/
+        cd client1_repo
+        git add .
+        git commit -m "Automated deployment from main branch"
+        git push
+
+    # - name: Deploy to Client 2
+    #   run: |
+    #     git clone git@github.com:client2/repo.git client2_repo
+    #     rsync -avz --delete \
+    #       --exclude '.git' \
+    #       --exclude 'vendor/' \
+    #       --exclude '.env' \
+    #       . client2_repo/
+    #     cd client2_repo
+    #     git add .
+    #     git commit -m "Automated deployment from main branch"
+    #     git push
