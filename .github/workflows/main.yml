@@ -18,19 +18,17 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
 
-    - name: Clone and push to likhona-lethu
+    - name: Update likhona Lethu
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        echo "Updating likhona-lethu..."
         git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/dev-kaycee/likhona-lethu.git
         cd likhona-lethu
         git remote add source https://github.com/${{ github.repository }}.git
         git pull source main
         git push origin main
-        echo "likhona-lethu updated successfully..."
 
-    - name: Clone and push to contour
+    - name: Update Contour
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
