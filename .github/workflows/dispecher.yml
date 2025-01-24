@@ -1,0 +1,99 @@
+name: Dispatch Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup-infrastructure:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Set up Laravel environment
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+
+  test-infrastructure:
+    runs-on: ubuntu-latest
+    needs: setup-infrastructure
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: homestead
+          MYSQL_USER: homestead
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Set up Laravel environment
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+
+    - name: Set environment variables and Database
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=homestead" >> .env
+        echo "DB_USERNAME=homestead" >> .env
+        echo "DB_PASSWORD=secret" >> .env
+
+  update-clients:
+    runs-on: ubuntu-latest
+    needs: test-infrastructure
+
+    steps:
+    - name: Trigger Repository Dispatch for Likhona Lethu
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        repository: dev-kaycee/likhona-lethu
+        event-type: update-from-source
+
+    - name: Trigger Repository Dispatch for Contour
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        repository: dev-kaycee/contour
+        event-type: update-from-source
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: update-clients
+    steps:
+    - name: Deployment Placeholder
+      run: echo "Deployment completed successfully"
